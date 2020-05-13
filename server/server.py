@@ -5,6 +5,7 @@ import os
 import errno
 import json
 import uuid
+import time
 
 # 票据数据存储
 ticket_database = 'key.json'
@@ -30,8 +31,8 @@ def main():
         sock.bind((server, port))
 
         # 服务器每5s尝试回收票据
-        # signal.signal(signal.SIGALRM, ticket_reclaim)
-        # signal.alarm(5)
+        signal.signal(signal.SIGALRM, ticket_reclaim)
+        signal.alarm(5)
 
         while True:
             try:
@@ -40,9 +41,9 @@ def main():
                 data = data.decode('utf-8')
                 print(f'accept new datagram from {addr}')
                 narrate('GOT', data, addr)
-                # time_left = signal.alarm(0)  # 正常操作中关闭alarm
+                time_left = signal.alarm(0)  # 正常操作中关闭alarm
                 handle_request(data, addr, sock)
-                # signal.alarm(time_left)
+                signal.alarm(time_left)
             except ConnectionResetError:
                 print("connection reset")
     except KeyboardInterrupt:
@@ -76,7 +77,7 @@ def do_hello(para):
     if len(key[remote_key]['uid']) >= key[remote_key]['max']:
         return 'FAIL no ticket available'
 
-    key[remote_key]['uid'].append(remote_uid)
+    key[remote_key]['uid'][remote_uid] = time.time()
     write_data(ticket_database, key)
     return 'TICK'
 
@@ -91,12 +92,12 @@ def do_goodbye(para):
         narrate('Bogus key ', (remote_key, remote_uid), None)
         return 'FAIL invalid key'
 
-    if remote_uid not in key[remote_key]['uid']:
+    if remote_uid not in key[remote_key]['uid'].keys():
         narrate('Bogus ticket', (remote_key, remote_uid), None)
         return 'FAIL invalid ticket'
 
     # good ticket
-    key[remote_key]['uid'].remove(remote_uid)
+    key[remote_key]['uid'].pop()
     write_data(ticket_database, key)
     return 'THNX seeya!'
 
@@ -111,11 +112,13 @@ def do_validate(para):
         narrate('Bogus key ', (remote_key, remote_uid), None)
         return 'FAIL invalid key'
 
-    if remote_uid not in key[remote_key]['uid']:
+    if remote_uid not in key[remote_key]['uid'].keys():
         narrate('Bogus ticket', (remote_key, remote_uid), None)
         return 'FAIL invalid ticket'
 
     # good ticket
+    key[remote_key]['uid'][remote_uid] = time.time()
+    write_data(ticket_database, key)
     return 'GOOD valid ticket'
 
 
@@ -125,21 +128,16 @@ def narrate(title, req, client):
 
 
 # 收回丢失的票据
-# def ticket_reclaim(signum, frame):
-#     global num_tickets_out
-#     for i in range(0, MAXUSERS):
-#         if ticket_array[i] != TICKET_AVAIL:
-#             try:
-#                 os.kill(ticket_array[i], 0)
-#             except OSError as e:
-#                 if e.errno == errno.ESRCH:
-#                     tick = '{}.{}'.format(ticket_array[i], i)
-#                     narrate("freeing ", tick, None)
-#                     ticket_array[i] = TICKET_AVAIL
-#                     write_data(ticket_database)  # 即时更新数据表
-#                     num_tickets_out -= 1
-#     # reset alarm clock
-#     signal.alarm(5)
+def ticket_reclaim(signum, frame):
+    t = time.time()
+    for k in key.keys():
+        for i in key[k]['uid'].keys():
+            if t - key[k]['uid'][i] >= 5*60:
+                key[k]['uid'].pop(i)
+                narrate("freeing ", i, None)
+                write_data(ticket_database, key)
+    # reset alarm clock
+    signal.alarm(5)
 
 
 # 读取数据
