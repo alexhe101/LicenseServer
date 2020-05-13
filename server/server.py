@@ -66,7 +66,6 @@ def handle_request(req, client, sock):
     if ret == -1:
         print("SERVER sendto failed")
 
-
 # 处理HELO命令
 def do_hello(para):
     remote_key = para[0]
@@ -131,7 +130,7 @@ def narrate(title, req, client):
 def ticket_reclaim(signum, frame):
     t = time.time()
     for k in key.keys():
-        for i in key[k]['uid'].keys():
+        for i in list(key[k]['uid'].keys()):
             if t - key[k]['uid'][i] >= 5*60:
                 key[k]['uid'].pop(i)
                 narrate("freeing ", i, None)
