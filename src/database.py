@@ -4,8 +4,9 @@ from time import time
 
 def save_on_change(func):
     def wrapper(self, *args, **kw):
-        func(self, *args, **kw)
+        ret = func(self, *args, **kw)
         self.save()
+        return ret
     return wrapper
 
 
@@ -26,7 +27,7 @@ class database():
     @save_on_change
     def gen_key(self, max=10):
         key = gen_id()
-        self.key[key] = {'uid': [], 'max': max}
+        self.key[key] = {'uid': {}, 'max': max}
         return key
 
     @save_on_change

@@ -12,7 +12,7 @@ database_path = 'sample/server/key.json'
 
 conf = {}
 db = None
-app = None
+app = Flask(__name__)
 
 
 def init():
@@ -73,9 +73,13 @@ def do_goodbye(key, uid):
 
 
 def api():
-    global app
-    app = Flask(__name__)
     app.run(host=conf['control'], port=conf['control_port'])
+
+
+@app.route('/admin/gen_key')
+def admin(ele):
+    key = db.gen_key()
+    return key
 
 
 if __name__ == '__main__':
