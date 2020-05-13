@@ -6,7 +6,7 @@ import errno
 import json
 import uuid
 import time
-
+import schedule
 # 票据数据存储
 ticket_database = 'key.json'
 key = {}
@@ -31,8 +31,9 @@ def main():
         sock.bind((server, port))
 
         # 服务器每5s尝试回收票据
-        signal.signal(signal.SIGALRM, ticket_reclaim)
-        signal.alarm(5)
+        #signal.signal(signal.SIGALRM, ticket_reclaim)
+        #signal.alarm(5)
+        schedule.every(5).minutes.do(ticket_reclaim())
 
         while True:
             try:
@@ -41,9 +42,10 @@ def main():
                 data = data.decode('utf-8')
                 print(f'accept new datagram from {addr}')
                 narrate('GOT', data, addr)
-                time_left = signal.alarm(0)  # 正常操作中关闭alarm
+                #time_left = signal.alarm(0)  # 正常操作中关闭alarm
                 handle_request(data, addr, sock)
-                signal.alarm(time_left)
+                #signal.alarm(time_left)
+                schedule.run_pending()
             except ConnectionResetError:
                 print("connection reset")
     except KeyboardInterrupt:
@@ -127,7 +129,7 @@ def narrate(title, req, client):
 
 
 # 收回丢失的票据
-def ticket_reclaim(signum, frame):
+def ticket_reclaim():
     t = time.time()
     for k in key.keys():
         for i in list(key[k]['uid'].keys()):
@@ -136,7 +138,7 @@ def ticket_reclaim(signum, frame):
                 narrate("freeing ", i, None)
                 write_data(ticket_database, key)
     # reset alarm clock
-    signal.alarm(5)
+    #signal.alarm(5)
 
 
 # 读取数据

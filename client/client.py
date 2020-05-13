@@ -1,11 +1,10 @@
 import socket
 import uuid
-import signal
 from sys import argv
+import schedule
 
 id = ""
 key = ""
-MSGLEN = 128
 ip = ""
 port = 0
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -50,7 +49,6 @@ def postRequest(req):
         narrate(recvMsg)
         return True
     elif recvMsg[:4] == "GOOD":
-        signal.alarm(200)
         return True
     else:
         narrate("error msg")
@@ -64,12 +62,12 @@ def main():
     init()
     if not postRequest("HELO"):  # 激活本机
         print("activate failed")
-    signal.signal(signal.SIGALRM, postRequest("VALD"))
-    signal.alarm(200)
+    schedule.every(2).minutes.do(postRequest("VALD"))
+
     try:
         print("client is running")
         while True:
-            pass
+            schedule.run_pending()
     except KeyboardInterrupt:
         print('manual exit')
     postRequest("GBYE")
