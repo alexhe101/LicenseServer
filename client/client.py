@@ -62,7 +62,7 @@ def main():
     init()
     if not postRequest("HELO"):  # 激活本机
         print("activate failed")
-    schedule.every(2).minutes.do(postRequest("VALD"))
+    schedule.every(2).minutes.do(postRequest,"VALD")
 
     try:
         print("client is running")

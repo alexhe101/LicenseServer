@@ -33,7 +33,7 @@ def main():
         # 服务器每5s尝试回收票据
         #signal.signal(signal.SIGALRM, ticket_reclaim)
         #signal.alarm(5)
-        schedule.every(5).minutes.do(ticket_reclaim())
+        schedule.every(1).minutes.do(ticket_reclaim)
 
         while True:
             try:
