@@ -97,7 +97,7 @@ def do_goodbye(para):
         return 'FAIL invalid ticket'
 
     # good ticket
-    key[remote_key]['uid'].pop()
+    key[remote_key]['uid'].pop(remote_uid)
     write_data(ticket_database, key)
     return 'THNX seeya!'
 
