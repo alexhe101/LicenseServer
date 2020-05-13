@@ -2,6 +2,17 @@ import json
 import uuid
 
 
+def read_text(filename):
+    with open(filename) as file_object:
+        data = file_object.read()
+    return data
+
+
+def write_text(filename, data):
+    with open(filename, 'w') as file_object:
+        file_object.write(data)
+
+
 def read_json(filename):
     with open(filename) as file_object:
         data = json.load(file_object)
