@@ -1,32 +1,28 @@
 import json
-import uuid
+from uuid import uuid4
 
 
-def read_text(filename):
-    with open(filename) as file_object:
-        data = file_object.read()
+def read_text(file):
+    with open(file) as f:
+        data = f.read()
     return data
 
 
-def write_text(filename, data):
-    with open(filename, 'w') as file_object:
-        file_object.write(data)
+def write_text(file, data):
+    with open(file, 'w') as f:
+        f.write(data)
 
 
-def read_json(filename):
-    with open(filename) as file_object:
-        data = json.load(file_object)
+def read_json(file):
+    with open(file) as f:
+        data = json.load(f)
     return data
 
 
-def write_json(filename, data):
-    with open(filename, 'w') as file_object:
-        json.dump(data, file_object)
-
-
-def narrate(title, req, client):
-    print(f'SERVER: {title}, {req}, {client}')
+def write_json(file, data):
+    with open(file, 'w') as f:
+        json.dump(data, f)
 
 
 def gen_id():
-    return uuid.uuid4().hex
+    return uuid4().hex
