@@ -32,7 +32,7 @@ class database():
         return list(self.db.keys())
 
     def has_key(self, key):
-        return self.get_keys() != None and key in self.get_keys()
+        return key in self.get_keys()
 
     @auto_save
     def gen_key(self, max=10):
