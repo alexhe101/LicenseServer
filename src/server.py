@@ -7,18 +7,7 @@ from flask import Flask
 from database import database
 from util import read_json
 
-config_path = 'sample/server/config.json'
-database_path = 'sample/server/key.json'
-
-conf = {}
-db = None
 app = Flask(__name__)
-
-
-def init():
-    global conf, db
-    conf = read_json(config_path)
-    db = database(database_path)
 
 
 def main():
@@ -26,7 +15,6 @@ def main():
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind((conf['server'], conf['server_port']))
         schedule.every(conf['refresh']).seconds.do(db.reclain_all)
-
         while True:
             try:
                 data, addr = sock.recvfrom(70)
@@ -67,10 +55,6 @@ def do_goodbye(key, uid):
     return 'GOOD'
 
 
-def api():
-    app.run(host=conf['control'], port=conf['control_port'])
-
-
 @app.route('/admin/gen_key')
 def admin():
     key = db.gen_key()
@@ -78,6 +62,11 @@ def admin():
 
 
 if __name__ == '__main__':
-    init()
-    Thread(target=api).run()
+    global conf, db
+    conf = read_json('sample/server/config.json')
+    db = database('sample/server/key.json')
+
+    Thread(target=app.run, kwargs={
+           'host': conf['control'], 'port': conf['control_port']}).start()
+
     main()
