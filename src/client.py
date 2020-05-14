@@ -62,13 +62,18 @@ def check_alive():
         print('good')
     elif res == 'NCMD':
         print('NCMD')
+    else:
+        print("remote disconnected")
 
 
 def post_request(req):
     req = '.'.join([req, key, uid]).encode('ascii')
     while sock.sendto(req, (ip, port)) == -1:
         pass
-    res = sock.recv(4).decode('ascii')
+    try:
+        res = sock.recv(4).decode('ascii')
+    except ConnectionError:
+        res = ("DISC")
     return res
 
 
