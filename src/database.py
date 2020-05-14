@@ -30,7 +30,7 @@ class database():
         write_json(self.file, self.db)
 
     def get_keys(self):
-        return self.db.keys()
+        return list(self.db.keys())
 
     @validate_key(False)
     def has_key(self, key):
@@ -48,7 +48,7 @@ class database():
 
     @validate_key(None)
     def get_uids(self, key):
-        return self.db[key]['uid'].keys()
+        return list(self.db[key]['uid'].keys())
 
     @validate_key(False)
     def has_uid(self, key, uid):
@@ -96,7 +96,7 @@ class database():
         elif self.db[key]['uid'].values()[0] + time_out >= time():
             return False
         else:
-            self.del_uid(key, self.db[key]['uid'].keys()[0])
+            self.del_uid(key, self.get_uids(key)[0])
             return True
 
     def reclain(self, key, time_out=600):
@@ -104,5 +104,5 @@ class database():
             pass
 
     def reclain_all(self, time_out=600):
-        for key in self.db.keys():
+        for key in self.get_keys():
             self.reclain(key, time_out)
