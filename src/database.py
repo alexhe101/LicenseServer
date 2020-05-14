@@ -6,8 +6,7 @@ def validate_key(ret):
     def decorator(func):
         def wrapper(self, *args, **kw):
             return func(self, *args, **kw) \
-                if self.get_keys() != None \
-                and self.has_key(args[0]) \
+                if self.has_key(args[0])\
                 else ret
         return wrapper
     return decorator
@@ -32,9 +31,8 @@ class database():
     def get_keys(self):
         return list(self.db.keys())
 
-    @validate_key(False)
     def has_key(self, key):
-        return key in self.get_keys()
+        return self.get_keys() != None and key in self.get_keys()
 
     @auto_save
     def gen_key(self, max=10):
