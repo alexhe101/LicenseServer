@@ -93,7 +93,7 @@ class database():
     def squeeze(self, key, time_out=600):
         if len(self.get_uids(key)) < 1:
             return False
-        elif self.db[key]['uid'].values()[0] + time_out >= time():
+        elif list(self.db[key]['uid'].values())[0] + time_out >= time():
             return False
         else:
             self.del_uid(key, self.get_uids(key)[0])
