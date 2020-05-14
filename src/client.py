@@ -6,7 +6,7 @@ import schedule
 
 from util import gen_id, read_json, read_text, write_text
 
-config_path = 'sample/client/config.json'
+config_path = '../sample/client/config.json'
 key_path = 'key'
 uid_path = 'uid'
 
@@ -30,19 +30,19 @@ def main():
         port = conf['remote_port']
 
         if isfile(key_path):
-            key = read_text(key)
+            key = read_text(key_path)
         else:
             prompt_for_key()
 
         if isfile(uid_path):
-            uid = read_text(key_path)
+            uid = read_text(uid_path)
         else:
             uid = gen_id()
             write_text(uid_path, uid)
 
         check_alive()
-        schedule.every(conf['interval']).seconds.do(check_alive)
-
+        #schedule.every(conf['interval']).seconds.do(check_alive)
+        schedule.every(5).seconds.do(check_alive)
         print("client is running")
         while True:
             schedule.run_pending()
