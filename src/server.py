@@ -1,4 +1,5 @@
 import socket
+from pathlib import Path
 from threading import Thread
 
 import schedule
@@ -63,8 +64,10 @@ def admin():
 
 if __name__ == '__main__':
     global conf, db
-    conf = read_json('sample/server/config.json')
-    db = database('sample/server/key.json')
+    conf = read_json(Path(__file__).parents[1].joinpath(
+        'sample', 'server', 'config.json'))
+    db = database(Path(__file__).parents[1].joinpath(
+        'sample', 'server', 'key.json'))
 
     Thread(target=app.run, kwargs={
            'host': conf['control'], 'port': conf['control_port']}).start()
