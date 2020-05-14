@@ -5,7 +5,7 @@ import schedule
 from flask import Flask
 
 from database import database
-from util import read_json, narrate
+from util import read_json
 
 config_path = 'sample/server/config.json'
 database_path = 'sample/server/key.json'
@@ -24,22 +24,18 @@ def init():
 def main():
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind((conf['server'], conf['port']))
+        sock.bind((conf['server'], conf['server_port']))
         schedule.every(conf['refresh']).seconds.do(db.reclain_all)
 
         while True:
             try:
-                print('wait for datagram......')
                 data, addr = sock.recvfrom(70)
                 data = data.decode('ascii')
-                print(f'accept new datagram from {addr}')
-                narrate('GOT', data, addr)
                 handle_request(data, addr, sock)
                 schedule.run_pending()
             except ConnectionResetError:
-                print("connection reset")
+                pass
     except KeyboardInterrupt:
-        print('manual exit')
         sock.close()
 
 
@@ -51,7 +47,6 @@ def handle_request(req, client, sock):
         response = do_goodbye(key, uid)
     else:
         response = 'NCMD'
-    narrate("SAID:", req, client)
     ret = sock.sendto(response.encode('ascii'), client)
     if ret == -1:
         print("SERVER sendto failed")
@@ -77,7 +72,7 @@ def api():
 
 
 @app.route('/admin/gen_key')
-def admin(ele):
+def admin():
     key = db.gen_key()
     return key
 
