@@ -2,7 +2,18 @@ from util import write_json, read_json, gen_id
 from time import time
 
 
-def save_on_change(func):
+def validate_key(ret):
+    def decorator(func):
+        def wrapper(self, *args, **kw):
+            return func(self, *args, **kw) \
+                if self.get_keys() != None \
+                and self.has_key(args[0]) \
+                else ret
+        return wrapper
+    return decorator
+
+
+def auto_save(func):
     def wrapper(self, *args, **kw):
         ret = func(self, *args, **kw)
         self.save()
@@ -11,87 +22,81 @@ def save_on_change(func):
 
 
 class database():
-    def __init__(self, filename):
-        self.file = filename
-        self.key = read_json(filename)
+    def __init__(self, file):
+        self.file = file
+        self.db = read_json(file)
 
     def save(self):
-        write_json(self.file, self.key)
+        write_json(self.file, self.db)
 
     def get_keys(self):
-        return self.key.keys()
+        return list(self.db.keys())
 
+    @validate_key(False)
     def has_key(self, key):
         return key in self.get_keys()
 
-    @save_on_change
+    @auto_save
     def gen_key(self, max=10):
         key = gen_id()
-        self.key[key] = {'uid': {}, 'max': max}
+        self.db[key] = {'uid': {}, 'max': max}
         return key
 
-    @save_on_change
+    @auto_save
     def del_key(self, key):
-        self.key.pop(key)
+        self.db.pop(key)
 
+    @validate_key(None)
     def get_uids(self, key):
-        if not self.has_key(key):
-            return None
-        return self.key[key]['uid'].get_keys()
+        return list(self.db[key]['uid'].keys())
 
+    @validate_key(False)
     def has_uid(self, key, uid):
         return uid in self.get_uids(key)
 
-    @save_on_change
+    @validate_key(False)
+    @auto_save
     def add_uid(self, key, uid):
-        if key not in self.get_keys():
-            return False
-        self.key[key]['uid'][uid] = time()
+        self.db[key]['uid'][uid] = time()
         return True
 
-    @save_on_change
+    @validate_key(False)
+    @auto_save
     def update_uid(self, key, uid):
-        if not self.has_uid(key, uid):
-            return False
-        self.key[key]['uid'][uid] = time()
+        self.db[key]['uid'][uid] = time()
         return True
 
-    @save_on_change
+    @validate_key(None)
+    @auto_save
     def del_uid(self, key, uid):
-        if key not in self.get_keys():
-            return
-        self.key[key]['uid'].pop(uid)
+        self.db[key]['uid'].pop(uid)
 
+    @validate_key(-1)
     def get_max(self, key):
-        if not self.has_key(key):
-            return None
-        return self.key[key]['max']
+        return self.db[key]['max']
 
+    @validate_key(False)
     def full(self, key):
-        if not self.has_key(key):
-            return False
-        return len(self.get_uids(key)) <= self.get_max(key)
+        return len(self.get_uids(key)) >= self.get_max(key)
 
+    @validate_key(None)
     def sort(self, key):
-        if not self.has_key(key):
-            return
-        self.key[key]['uid'] = {
+        self.db[key]['uid'] = {
             k: v for k, v in sorted(
-                self.key[key]['uid'].items(),
+                self.db[key]['uid'].items(),
                 key=lambda item: item[1]
             )
         }
 
-    @save_on_change
+    @validate_key(False)
+    @auto_save
     def squeeze(self, key, time_out=600):
-        if not self.has_key(key):
+        if len(self.get_uids(key)) < 1:
             return False
-        elif len(self.get_uids(key)) < 1:
-            return False
-        elif self.key[key]['uid'].values()[0] + time_out >= time():
+        elif list(self.db[key]['uid'].values())[0] + time_out >= time():
             return False
         else:
-            self.del_uid(key, self.key[key]['uid'].keys()[0])
+            self.del_uid(key, self.get_uids(key)[0])
             return True
 
     def reclain(self, key, time_out=600):
@@ -99,5 +104,5 @@ class database():
             pass
 
     def reclain_all(self, time_out=600):
-        for key in self.key.keys():
+        for key in self.get_keys():
             self.reclain(key, time_out)
