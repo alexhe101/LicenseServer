@@ -1,11 +1,12 @@
 import socket
+from pathlib import Path
 from threading import Thread
 
 import schedule
 from flask import Flask
 
 from database import database
-from util import read_json
+from util import read_json, narrate
 
 app = Flask(__name__)
 
@@ -13,31 +14,33 @@ app = Flask(__name__)
 def main():
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.bind((conf['server'], conf['server_port']))
+        sock.bind((conf['server'], conf['port']))
+        narrate('server', 'listen at', f"{conf['server']}:{conf['port']}")
         schedule.every(conf['refresh']).seconds.do(db.reclain_all)
         while True:
             try:
-                data, addr = sock.recvfrom(70)
-                data = data.decode('ascii')
-                handle_request(data, addr, sock)
+                req, addr = sock.recvfrom(70)
+                req = req.decode('ascii')
+                narrate(addr, 'request',  req)
+                res = handle_request(req)
+                sock.sendto(res.encode('ascii'), addr)
+                narrate('server', 'respone', res)
                 schedule.run_pending()
             except ConnectionResetError:
-                pass
+                narrate(addr, 'reset', 'connection', 'error')
     except KeyboardInterrupt:
+        narrate('keyboard', 'interrupt', 'program', 'warning')
         sock.close()
 
 
-def handle_request(req, client, sock):
+def handle_request(req):
     op, key, uid = list(req.split('.'))
     if op == 'HELO':
-        response = do_hello(key, uid)
+        return do_hello(key, uid)
     elif op == 'GBYE':
-        response = do_goodbye(key, uid)
+        return do_goodbye(key, uid)
     else:
-        response = 'NCMD'
-    ret = sock.sendto(response.encode('ascii'), client)
-    if ret == -1:
-        print("SERVER sendto failed")
+        return 'NCMD'
 
 
 def do_hello(key, uid):
@@ -63,10 +66,12 @@ def admin():
 
 if __name__ == '__main__':
     global conf, db
-    conf = read_json('sample/server/config.json')
-    db = database('sample/server/key.json')
+    conf = read_json(Path(__file__).parents[1].joinpath(
+        'sample', 'server', 'config.json'))
+    db = database(Path(__file__).parents[1].joinpath(
+        'sample', 'server', 'key.json'))
 
     Thread(target=app.run, kwargs={
-           'host': conf['control'], 'port': conf['control_port']}).start()
+           'host': conf['api'], 'port': conf['api_port']}).start()
 
     main()

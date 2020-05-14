@@ -26,3 +26,7 @@ def write_json(file, data):
 
 def gen_id():
     return uuid4().hex
+
+
+def narrate(subject, verb, object, level='info'):
+    print(f'[{level}] {subject}: {verb} {object}')
