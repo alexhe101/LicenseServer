@@ -45,4 +45,4 @@ Delete one existing key.
 /del_uid/:key/:uid
 ```
 
-Delete one existing uid.
+Delete one existing uid
