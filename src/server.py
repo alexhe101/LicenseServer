@@ -6,7 +6,7 @@ import schedule
 from flask import Flask, request
 
 from database import database
-from util import read_json, narrate
+from util import narrate, read_json
 
 app = Flask(__name__)
 
@@ -16,7 +16,7 @@ def main():
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind((conf['server'], conf['port']))
         narrate('server', 'listen at', f"{conf['server']}:{conf['port']}")
-        schedule.every(conf['refresh']).seconds.do(db.reclain_all)
+        schedule.every(conf['refresh']).seconds.do(db.reclain)
         while True:
             try:
                 req, addr = sock.recvfrom(70)
@@ -37,25 +37,26 @@ def handle_request(req):
     op, key, uid = list(req.split('.'))
     if op == 'HELO':
         return do_hello(key, uid)
-    elif op == 'GBYE':
+    if op == 'GBYE':
         return do_goodbye(key, uid)
-    else:
-        return 'NCMD'
+    return 'NCMD'
 
 
 def do_hello(key, uid):
     if not db.has_key(key):
         return 'NKEY'
-    elif db.full(key) and not db.squeeze(key, conf['time_out']):
-        return 'FULL'
-    else:
-        db.add_uid(key, uid)
-        return 'GOOD'
+    if db.full(key) and not db.has_uid(key, uid):
+        inactive = db.get_inactive(key)
+        if not inactive:
+            return 'FULL'
+        db.del_uid(key, inactive)
+    db.update_uid(key, uid)
+    return 'GOOD'
 
 
 def do_goodbye(key, uid):
     db.del_uid(key, uid)
-    return 'GOOD'
+    return 'THNX'
 
 
 @app.route('/key/<op>')
@@ -79,7 +80,7 @@ def uid_op(key, op):
         return tuple(db.get_uids(key))
     elif op == 'add':
         uid = request.args.get('uid')
-        return str(db.add_uid(key, uid))
+        return str(db.update_uid(key, uid))
     elif op == 'del':
         uid = request.args.get('uid')
         db.del_uid(key, uid)
@@ -89,9 +90,22 @@ def uid_op(key, op):
     return 'bad request', 400
 
 
-@app.route('/db')
-def db_op():
-    return db.db
+@app.route('/<op>', defaults={'max': 10, 'key': '', 'uid': ''})
+@app.route('/<op>/<int:max>', defaults={'key': '', 'uid': ''})
+@app.route('/<op>/<string:key>', defaults={'max': 0, 'uid': ''})
+@app.route('/<op>/<string:key>/<string:uid>', defaults={'max': 0})
+def do(op, key, uid, max):
+    if op == 'db':
+        return db.db
+    if op == 'gen_key':
+        return db.gen_key(max)
+    if op == 'del_key':
+        db.del_key(key)
+        return 'DONE'
+    if op == 'del_uid':
+        db.del_uid(key, uid)
+        return 'DONE'
+    return 'bad request', 400
 
 
 if __name__ == '__main__':
