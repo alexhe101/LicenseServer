@@ -3,7 +3,7 @@ from pathlib import Path
 from threading import Thread
 
 import schedule
-from flask import Flask
+from flask import Flask, request
 
 from database import database
 from util import read_json, narrate
@@ -58,10 +58,40 @@ def do_goodbye(key, uid):
     return 'GOOD'
 
 
-@app.route('/admin/gen_key')
-def admin():
-    key = db.gen_key()
-    return key
+@app.route('/key/<op>')
+def key_op(op):
+    if op == 'get':
+        return tuple(db.get_keys())
+    elif op == 'gen':
+        max = int(request.args.get('max'))
+        return db.gen_key(max)
+    elif op == 'del':
+        db.del_key(request.args.get('key'))
+        return 'OK'
+    elif op == 'full':
+        return str(db.full(request.args.get('key')))
+    return 'bad request', 400
+
+
+@app.route('/uid/<key>/<op>')
+def uid_op(key, op):
+    if op == 'get':
+        return tuple(db.get_uids(key))
+    elif op == 'add':
+        uid = request.args.get('uid')
+        return str(db.add_uid(key, uid))
+    elif op == 'del':
+        uid = request.args.get('uid')
+        db.del_uid(key, uid)
+        return 'OK'
+    elif op == 'last_seen':
+        return db.last_seen(key, request.args.get('uid'))
+    return 'bad request', 400
+
+
+@app.route('/db')
+def db_op():
+    return db.db
 
 
 if __name__ == '__main__':

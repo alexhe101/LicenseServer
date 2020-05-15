@@ -1,23 +1,6 @@
 from util import write_json, read_json, gen_id
 from time import time
-
-
-def validate_key(ret):
-    def decorator(func):
-        def wrapper(self, *args, **kw):
-            return func(self, *args, **kw) \
-                if self.has_key(args[0])\
-                else ret
-        return wrapper
-    return decorator
-
-
-def auto_save(func):
-    def wrapper(self, *args, **kw):
-        ret = func(self, *args, **kw)
-        self.save()
-        return ret
-    return wrapper
+from decorator import *
 
 
 class database():
@@ -58,16 +41,20 @@ class database():
         self.db[key]['uid'][uid] = time()
         return True
 
-    @validate_key(False)
+    @validate_uid(False)
     @auto_save
     def update_uid(self, key, uid):
         self.db[key]['uid'][uid] = time()
         return True
 
-    @validate_key(None)
+    @validate_uid(None)
     @auto_save
     def del_uid(self, key, uid):
         self.db[key]['uid'].pop(uid)
+
+    @validate_uid(0)
+    def last_seen(self, key, uid):
+        return self.db[key]['uid'][uid]
 
     @validate_key(-1)
     def get_max(self, key):
