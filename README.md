@@ -29,20 +29,20 @@ THNX # bye bye
 Get current database, including all key, uid, last_seen, and max.
 
 ```bash
-/gen_key
-/gen_key/:max
+/gen
+/gen/:max
 ```
 
 Generate new key, where max is optional.
 
 ```bash
-/del_key/:key
+/del/:key
 ```
 
 Delete one existing key.
 
 ```bash
-/del_uid/:key/:uid
+/del/:key/:uid
 ```
 
 Delete one existing uid
