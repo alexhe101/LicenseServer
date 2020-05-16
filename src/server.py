@@ -59,22 +59,21 @@ def do_goodbye(key, uid):
     return 'THNX'
 
 
-@api.route('/<op>', defaults={'max': 10, 'key': '', 'uid': ''})
-@api.route('/<op>/<int:max>', defaults={'key': '', 'uid': ''})
-@api.route('/<op>/<string:key>', defaults={'max': 0, 'uid': ''})
-@api.route('/<op>/<string:key>/<string:uid>', defaults={'max': 0})
-def do(op, key, uid, max):
+@api.route('/<op>')
+@api.route('/<op>/<int:max>')
+@api.route('/<op>/<string:key>')
+@api.route('/<op>/<string:key>/<string:uid>')
+def do(op, key='', uid='', max=0):
+    res, code = '', 200
     if op == 'db':
-        return db.db
+        res = db.db
     if op == 'gen_key':
-        return db.gen_key(max)
+        res = db.gen_key(max)
     if op == 'del_key':
         db.del_key(key)
-        return 'DONE'
     if op == 'del_uid':
         db.del_uid(key, uid)
-        return 'DONE'
-    return 'bad request', 400
+    return res, code
 
 
 if __name__ == '__main__':
