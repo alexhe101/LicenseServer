@@ -63,16 +63,19 @@ def do_goodbye(key, uid):
 @api.route('/<op>/<int:max>')
 @api.route('/<op>/<string:key>')
 @api.route('/<op>/<string:key>/<string:uid>')
-def do(op, key='', uid='', max=0):
+def do(op, key='', uid='', max=10):
     res, code = '', 200
     if op == 'db':
         res = db.db
-    if op == 'gen_key':
+    elif op == 'gen':
         res = db.gen_key(max)
-    if op == 'del_key':
-        db.del_key(key)
-    if op == 'del_uid':
-        db.del_uid(key, uid)
+    elif op == 'del':
+        if uid:
+            db.del_uid(key, uid)
+        else:
+            db.del_key(key)
+    else:
+        code = 400
     return res, code
 
 
