@@ -3,12 +3,12 @@ from pathlib import Path
 from threading import Thread
 
 import schedule
-from flask import Flask, request
+from flask import Flask
 
 from database import database
 from util import narrate, read_json
 
-app = Flask(__name__)
+api = Flask(__name__)
 
 
 def main():
@@ -59,53 +59,21 @@ def do_goodbye(key, uid):
     return 'THNX'
 
 
-@app.route('/key/<op>')
-def key_op(op):
-    if op == 'get':
-        return tuple(db.get_keys())
-    elif op == 'gen':
-        max = int(request.args.get('max'))
-        return db.gen_key(max)
-    elif op == 'del':
-        db.del_key(request.args.get('key'))
-        return 'OK'
-    elif op == 'full':
-        return str(db.full(request.args.get('key')))
-    return 'bad request', 400
-
-
-@app.route('/uid/<key>/<op>')
-def uid_op(key, op):
-    if op == 'get':
-        return tuple(db.get_uids(key))
-    elif op == 'add':
-        uid = request.args.get('uid')
-        return str(db.update_uid(key, uid))
-    elif op == 'del':
-        uid = request.args.get('uid')
-        db.del_uid(key, uid)
-        return 'OK'
-    elif op == 'last_seen':
-        return db.last_seen(key, request.args.get('uid'))
-    return 'bad request', 400
-
-
-@app.route('/<op>', defaults={'max': 10, 'key': '', 'uid': ''})
-@app.route('/<op>/<int:max>', defaults={'key': '', 'uid': ''})
-@app.route('/<op>/<string:key>', defaults={'max': 0, 'uid': ''})
-@app.route('/<op>/<string:key>/<string:uid>', defaults={'max': 0})
-def do(op, key, uid, max):
+@api.route('/<op>')
+@api.route('/<op>/<int:max>')
+@api.route('/<op>/<string:key>')
+@api.route('/<op>/<string:key>/<string:uid>')
+def do(op, key='', uid='', max=0):
+    res, code = '', 200
     if op == 'db':
-        return db.db
+        res = db.db
     if op == 'gen_key':
-        return db.gen_key(max)
+        res = db.gen_key(max)
     if op == 'del_key':
         db.del_key(key)
-        return 'DONE'
     if op == 'del_uid':
         db.del_uid(key, uid)
-        return 'DONE'
-    return 'bad request', 400
+    return res, code
 
 
 if __name__ == '__main__':
@@ -115,7 +83,7 @@ if __name__ == '__main__':
     db = database(Path(__file__).parents[1].joinpath(
         'sample', 'server', 'key.json'))
 
-    Thread(target=app.run, kwargs={
+    Thread(target=api.run, kwargs={
            'host': conf['api'], 'port': conf['api_port']}).start()
 
     main()
