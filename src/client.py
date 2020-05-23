@@ -26,6 +26,9 @@ def main():
         global conf, uid, key, ip, port, sock
         conf = read_json(config_path)
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        socket.setdefaulttimeout(3)
+        sock.settimeout(3)
+        #sock.setblocking(False)
         ip = conf['remote']
         port = conf['remote_port']
 
@@ -68,11 +71,11 @@ def check_alive():
 
 def post_request(req):
     req = '.'.join([req, key, uid]).encode('ascii')
-    while sock.sendto(req, (ip, port)) == -1:
-        pass
+    i = 0
+    sock.sendto(req, (ip, port))
     try:
         res = sock.recv(4).decode('ascii')
-    except ConnectionError:
+    except socket.timeout:
         res = ("DISC")
     return res
 
