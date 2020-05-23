@@ -68,8 +68,8 @@ class database():
                 key=lambda item: item[1]
             )
         }
-        return sort.keys()[0] \
-            if sort.values()[0] + time_out <= time() \
+        return list(sort.keys())[0] \
+            if list(sort.values())[0] + time_out <= time() \
             else ''
 
     def reclain(self, time_out=90):
