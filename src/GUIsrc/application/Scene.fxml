@@ -8,7 +8,7 @@
 
 <AnchorPane prefHeight="604.0" prefWidth="1012.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.Control">
    <children>
-      <Button fx:id="start" layoutX="308.0" layoutY="404.0" mnemonicParsing="false" prefHeight="54.0" prefWidth="161.0" text="进入程序">
+      <Button fx:id="start" layoutX="312.0" layoutY="448.0" mnemonicParsing="false" prefHeight="54.0" prefWidth="161.0" text="进入程序">
          <font>
             <Font size="22.0" />
          </font></Button>
@@ -45,15 +45,25 @@
             <Font size="22.0" />
          </font>
       </Label>
-      <Button fx:id="myreturn" layoutX="247.0" layoutY="404.0" mnemonicParsing="false" prefHeight="54.0" prefWidth="201.0" text="返回登录界面">
+      <Button fx:id="myreturn" layoutX="251.0" layoutY="448.0" mnemonicParsing="false" prefHeight="54.0" prefWidth="201.0" text="返回登录界面">
          <font>
             <Font size="22.0" />
          </font>
       </Button>
-      <Button fx:id="exit" layoutX="593.0" layoutY="404.0" mnemonicParsing="false" prefHeight="54.0" prefWidth="161.0" text="退出程序">
+      <Button fx:id="exit" layoutX="597.0" layoutY="448.0" mnemonicParsing="false" prefHeight="54.0" prefWidth="161.0" text="退出程序">
          <font>
             <Font size="22.0" />
          </font>
       </Button>
+      <VBox alignment="TOP_CENTER" layoutX="697.0" layoutY="345.0" prefHeight="54.0" prefWidth="215.0" spacing="8.0">
+         <children>
+            <RadioButton fx:id="ten" mnemonicParsing="false" onAction="#initialize"  selected="true" text="10人许可证" >
+            	<toggleGroup>
+                	<ToggleGroup fx:id="size" />
+                </toggleGroup>
+            </RadioButton>
+            <RadioButton fx:id="five" mnemonicParsing="false" onAction="#initialize" text="50人许可证" toggleGroup="$size"/>
+         </children>
+      </VBox>
    </children>
 </AnchorPane>

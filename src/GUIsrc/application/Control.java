@@ -9,6 +9,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 
 public class Control {
@@ -25,6 +26,9 @@ public class Control {
 	@FXML private Label text;
 	@FXML private Button exit;
 	@FXML private Button myreturn;
+	
+	@FXML private RadioButton ten;
+	@FXML private RadioButton five;
 	
 	@SuppressWarnings("unused")
 	private String namestr;
@@ -130,7 +134,7 @@ public class Control {
 							flag=0;
 							a = new Alert(AlertType.WARNING);
 							a.titleProperty().set("key");
-							a.headerTextProperty().set("Çë¼ì²éÊäÈëµÄÐí¿ÉÖ¤");
+							a.headerTextProperty().set("è¯·æ£€æŸ¥è¾“å…¥çš„è®¸å¯è¯");
 							a.showAndWait();
 							start.setVisible(true);
 							data.setstop(1);
@@ -149,15 +153,24 @@ public class Control {
 			{
 				a = new Alert(AlertType.WARNING);
 				a.titleProperty().set("key");
-				a.headerTextProperty().set("ÇëÖØÐÂÊäÈëÐí¿ÉÖ¤");
+				a.headerTextProperty().set("è¯·é‡æ–°è¾“å…¥è®¸å¯è¯");
 				a.showAndWait();
 			}
 		});
 		
 		getkey.setOnAction(e->{
+			String v = null;
+			if(ten.isSelected())
+			{
+				v="/10";
+			}
+			else if(five.isSelected())
+			{
+				v="/50";
+			}
 			 try {
 		            Runtime.getRuntime().exec(
-		                    "cmd /c start http://127.0.0.1:10002/gen");
+		                    "cmd /c start http://127.0.0.1:10002/gen"+v);
 		        } catch (IOException e1) {
 		            e1.printStackTrace();
 		        }
