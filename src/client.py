@@ -59,6 +59,7 @@ def main():
 
 def check_alive():
     res = post_request('HELO')
+    status_file = open(status_path, "w")
     if res == 'NKEY':
         prompt_for_key()
     elif res == 'FULL':
