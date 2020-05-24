@@ -18,7 +18,7 @@ def delete(ku):
 
 
 def gen_key(max):
-    return get('http://127.0.0.1:10002/gen/'+max).txt
+    return get('http://127.0.0.1:10002/gen/'+max).text
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -31,6 +31,7 @@ def index():
             delete(list(request.form.keys())[0])
     return render_template('index.html', db=get_db(), key=key)
 
-
+def appRun():
+    app.run()
 if __name__ == '__main__':
     app.run()

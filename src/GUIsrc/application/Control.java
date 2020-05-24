@@ -134,7 +134,7 @@ public class Control {
 							flag=0;
 							a = new Alert(AlertType.WARNING);
 							a.titleProperty().set("key");
-							a.headerTextProperty().set("Çë¼ì²éÊäÈëµÄĞí¿ÉÖ¤");
+							a.headerTextProperty().set("è¯·æ£€æŸ¥è¾“å…¥çš„è®¸å¯è¯");
 							a.showAndWait();
 							start.setVisible(true);
 							data.setstop(1);
@@ -153,7 +153,7 @@ public class Control {
 			{
 				a = new Alert(AlertType.WARNING);
 				a.titleProperty().set("key");
-				a.headerTextProperty().set("ÇëÖØĞÂÊäÈëĞí¿ÉÖ¤");
+				a.headerTextProperty().set("è¯·é‡æ–°è¾“å…¥è®¸å¯è¯");
 				a.showAndWait();
 			}
 		});
