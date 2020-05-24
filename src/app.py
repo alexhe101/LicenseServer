@@ -31,6 +31,7 @@ def index():
             delete(list(request.form.keys())[0])
     return render_template('index.html', db=get_db(), key=key)
 
-
+def appRun():
+    app.run()
 if __name__ == '__main__':
     app.run()

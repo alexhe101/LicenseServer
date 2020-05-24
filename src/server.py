@@ -7,7 +7,7 @@ from flask import Flask
 
 from database import database
 from util import narrate, read_json
-
+from app import appRun
 api = Flask(__name__)
 config_path = '../sample/server/config.json'
 db_path = '../sample/server/key.json'
@@ -86,5 +86,5 @@ if __name__ == '__main__':
 
     Thread(target=api.run, kwargs={
            'host': conf['api'], 'port': conf['api_port']}).start()
-
+    Thread(target=appRun).start()
     main()
