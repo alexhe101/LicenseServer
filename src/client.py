@@ -71,7 +71,6 @@ def check_alive():
 
 def post_request(req):
     req = '.'.join([req, key, uid]).encode('ascii')
-    i = 0
     sock.sendto(req, (ip, port))
     try:
         res = sock.recv(4).decode('ascii')
