@@ -11,6 +11,8 @@ from app import appRun
 api = Flask(__name__)
 config_path = 'config.json'
 db_path = 'key.json'
+
+
 def main():
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -81,8 +83,8 @@ def do(op, key='', uid='', max=10):
 
 if __name__ == '__main__':
     global conf, db
-    conf = read_json(os.path.join(os.getcwd(),config_path))
-    db = database(os.path.join(os.getcwd(),db_path))
+    conf = read_json(os.path.join(os.path.dirname(__file__), config_path))
+    db = database(os.path.join(os.path.dirname(__file__), db_path))
 
     Thread(target=api.run, kwargs={
            'host': conf['api'], 'port': conf['api_port']}).start()
