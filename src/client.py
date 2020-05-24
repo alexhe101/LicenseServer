@@ -9,6 +9,7 @@ from util import gen_id, read_json, read_text, write_text
 config_path = '../sample/client/config.json'
 key_path = 'key'
 uid_path = 'uid'
+status_path = "status.txt"
 
 sock = None
 ip = ''
@@ -17,17 +18,18 @@ port = 0
 conf = {}
 key = ''
 uid = ''
-
+status_file = None
 activated = False
 
 
 def main():
     try:
-        global conf, uid, key, ip, port, sock
+        global conf, uid, key, ip, port, sock,status_file
         conf = read_json(config_path)
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         socket.setdefaulttimeout(3)
         sock.settimeout(3)
+        status_file = open(status_path, "w")
         #sock.setblocking(False)
         ip = conf['remote']
         port = conf['remote_port']
@@ -66,7 +68,10 @@ def check_alive():
     elif res == 'NCMD':
         print('NCMD')
     else:
-        print("remote disconnected")
+        res = "remote disconnected"
+        print(res)
+    status_file.write(res)
+    status_file.close()
 
 
 def post_request(req):
@@ -84,9 +89,11 @@ def prompt_for_key():
     res = 'NKEY'
     while res == 'NKEY':
         #while len(key) != 32:
+        status_file.write('Please enter valid license key: ')
         key = input('Please enter valid license key: ')
         res = post_request('HELO')
     write_text(key_path, key)
+    status_file.close()
 
 
 if __name__ == '__main__':
