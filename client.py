@@ -1,0 +1,103 @@
+from os.path import isfile
+import socket
+from sys import argv
+
+import schedule
+
+from util import gen_id, read_json, read_text, write_text
+
+config_path = '../sample/client/config.json'
+key_path = 'key'
+uid_path = 'uid'
+status_path = "status.txt"
+
+status_file = None
+sock = None
+ip = ''
+port = 0
+
+conf = {}
+key = ''
+uid = ''
+
+activated = False
+
+
+
+def main():
+    try:
+        global conf, uid, key, ip, port, sock,status_file
+        status_file = open(status_path,"w")
+        conf = read_json(config_path)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        socket.setdefaulttimeout(3)
+        sock.settimeout(3)
+        ip = conf['remote']
+        port = conf['remote_port']
+
+        if isfile(key_path):
+            key = read_text(key_path)
+        else:
+            prompt_for_key()
+
+        if isfile(uid_path):
+            uid = read_text(uid_path)
+        else:
+            uid = gen_id()
+            write_text(uid_path, uid)
+
+        check_alive()
+        #schedule.every(conf['interval']).seconds.do(check_alive)
+        schedule.every(5).seconds.do(check_alive)
+        print("client is running")
+        while True:
+            schedule.run_pending()
+    except KeyboardInterrupt:
+        print('manual exit')
+        post_request("GBYE")
+        sock.close()
+
+
+def check_alive():
+    status_file = open(status_path,"w")
+    res = post_request('HELO')
+    if res == 'NKEY':
+        prompt_for_key()
+    elif res == 'FULL':
+        print('full')
+    elif res == 'GOOD':
+        print('good')
+    elif res == 'NCMD':
+        print('NCMD')
+    else:
+        res = "remote disconnected"
+        print(res)
+    status_file.write(res)
+    status_file.close()
+
+
+def post_request(req):
+    req = '.'.join([req, key, uid]).encode('ascii')
+    i = 0
+    sock.sendto(req, (ip, port))
+    try:
+        res = sock.recv(4).decode('ascii')
+    except socket.timeout:
+        res = ("DISC")
+    return res
+
+
+def prompt_for_key():
+    global key
+    res = 'NKEY'
+    while res == 'NKEY':
+        #while len(key) != 32:
+        status_file.write('Please enter valid license key: ')
+        key = input('Please enter valid license key: ')
+        res = post_request('HELO')
+    write_text(key_path, key)
+    status_file.close()
+
+
+if __name__ == '__main__':
+    main()
