@@ -84,8 +84,8 @@ def prompt_for_key():
     global key
     res = 'NKEY'
     while res == 'NKEY':
-        while len(key) != 32:
-            key = input('Please enter valid license key: ')
+        #while len(key) != 32:
+        key = input('Please enter valid license key: ')
         res = post_request('HELO')
     write_text(key_path, key)
 
