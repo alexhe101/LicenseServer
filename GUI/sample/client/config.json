@@ -1,0 +1,5 @@
+{
+    "remote": "127.0.0.1",
+    "remote_port": 10001,
+    "interval": 60
+}
