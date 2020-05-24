@@ -18,7 +18,7 @@ def delete(ku):
 
 
 def gen_key(max):
-    return get('http://127.0.0.1:10002/gen/'+max).txt
+    return get('http://127.0.0.1:10002/gen/'+max).text
 
 
 @app.route('/', methods=['GET', 'POST'])
