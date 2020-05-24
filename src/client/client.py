@@ -1,12 +1,11 @@
 from os.path import isfile
 import socket
-from sys import argv
-
+import os
 import schedule
 
 from util import gen_id, read_json, read_text, write_text
 
-config_path = '../sample/client/config.json'
+config_path = 'config.json'
 key_path = 'key'
 uid_path = 'uid'
 status_path = "status.txt"
@@ -25,7 +24,7 @@ activated = False
 def main():
     try:
         global conf, uid, key, ip, port, sock,status_file
-        conf = read_json(config_path)
+        conf = read_json(os.path.join(os.getcwd(),config_path))
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         socket.setdefaulttimeout(3)
         sock.settimeout(3)
@@ -81,6 +80,8 @@ def post_request(req):
     try:
         res = sock.recv(4).decode('ascii')
     except socket.timeout:
+        res = ("DISC")
+    except ConnectionError:
         res = ("DISC")
     return res
 
