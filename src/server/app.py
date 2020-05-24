@@ -2,6 +2,7 @@ from requests import get
 from json import loads
 from flask import Flask, render_template, request, redirect
 from datetime import datetime
+import os
 app = Flask(__name__)
 
 
@@ -29,7 +30,7 @@ def index():
             key = gen_key(request.form.get('max'))
         else:
             delete(list(request.form.keys())[0])
-    return render_template('index.html', db=get_db(), key=key)
+    return render_template("index.html", db=get_db(), key=key)
 
 def appRun():
     app.run()

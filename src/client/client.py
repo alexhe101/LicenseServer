@@ -6,9 +6,9 @@ import schedule
 from util import gen_id, read_json, read_text, write_text
 
 config_path = 'config.json'
-key_path = 'key'
-uid_path = 'uid'
-status_path = "status.txt"
+key_path = os.path.join(os.getcwd(),'key')
+uid_path = os.path.join(os.getcwd(),'uid')
+status_path = os.path.join(os.getcwd(),"status.txt")
 
 sock = None
 ip = ''
