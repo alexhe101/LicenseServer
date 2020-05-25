@@ -1,7 +1,8 @@
 package application;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import javafx.fxml.FXML;
@@ -41,7 +42,7 @@ public class Control {
 	private int flagwait=0;
 	
 	
-	public void initialize() throws FileNotFoundException
+	public void initialize() throws IOException
 	{
 		
 		Data data = new Data();
@@ -51,6 +52,24 @@ public class Control {
 		//exit.setVisible(false);
 		
 		road=System.getProperty("user.dir");
+		
+		File fkey=new File(road+"\\key");
+		String formkey;
+		if(fkey.exists())
+		{
+			BufferedReader br = new BufferedReader(new FileReader(fkey));
+			formkey=br.readLine();
+			br.close();
+		}
+		else
+		{
+			formkey="";
+		}
+		
+		if(fkey.exists())
+		{
+			keytext.setText(formkey);
+		}
 		//System.out.println(road);
 		
 		/*Process client;
@@ -70,14 +89,15 @@ public class Control {
 			e2.printStackTrace();
 		}*/
 		
-		Server server=new Server();
-		server.mystart(road);
-		server.start();
+		//Server server=new Server();
+		//server.mystart(road);
+		//server.start();
+		
 		
 		start.setOnAction(e->{
-			
-			
-			Listen listen=new Listen();
+			Monitor mo=new Monitor();
+			Listen listen = null;
+			listen=new Listen();
 			namestr=idtext.getText();
 			passwordstr=passwordtext.getText();
 			keystr=keytext.getText();
@@ -98,20 +118,29 @@ public class Control {
 				listen.mystart(road,data);
 				listen.start();
 				start.setVisible(false);
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
 				while(true)
 				{
 					if(flagwait==1)
 					{
 						try {
-							Thread.sleep(2000);
+							Thread.sleep(1300);
 							flagwait=0;
 						} catch (InterruptedException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
 					}
+					
 					if(data.getflag()!=null&&data.getflag().equals("GOOD"))
 					{
+						data.setflag("null");
+						
 						getkey.setVisible(false);
 						start.setVisible(false);
 						id.setVisible(false);
@@ -120,10 +149,16 @@ public class Control {
 						idtext.setVisible(false);
 						passwordtext.setVisible(false);
 						keytext.setVisible(false);
+						ten.setVisible(false);
+						five.setVisible(false);
+						
 						text.setVisible(true);
+						text.setText("³ÌÐòÕý³£ÔËÐÐ");
 						//exit.setVisible(true);
 						myreturn.setVisible(true);
 						flag=0;
+						mo.mystart(a,text,road,data);
+						mo.start();
 						break;
 					}
 					else
@@ -132,12 +167,13 @@ public class Control {
 						if(flag>200)
 						{
 							flag=0;
+							data.setstop(1);
 							a = new Alert(AlertType.WARNING);
 							a.titleProperty().set("key");
-							a.headerTextProperty().set("è¯·æ£€æŸ¥è¾“å…¥çš„è®¸å¯è¯");
+							a.headerTextProperty().set("Çë¼ì²éÊäÈëµÄÐí¿ÉÖ¤");
 							a.showAndWait();
 							start.setVisible(true);
-							data.setstop(1);
+							
 							break;
 						}
 						try {
@@ -153,7 +189,7 @@ public class Control {
 			{
 				a = new Alert(AlertType.WARNING);
 				a.titleProperty().set("key");
-				a.headerTextProperty().set("è¯·é‡æ–°è¾“å…¥è®¸å¯è¯");
+				a.headerTextProperty().set("ÇëÖØÐÂÊäÈëÐí¿ÉÖ¤");
 				a.showAndWait();
 			}
 		});
@@ -177,13 +213,45 @@ public class Control {
 		});
 		
 		exit.setOnAction(e->{
-			server.mystop();
+			//server.mystop();
 			data.setstop(1);
-			System.exit(0);
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			try {
+				@SuppressWarnings("unused")
+				Process client =Runtime.getRuntime().exec("taskkill /f /t /im client.exe");
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			Runtime.getRuntime().exit(0);
+			//System.exit(0);
 		});
+		
+		
 		
 		myreturn.setOnAction(e->{
 			data.setstop(1);
+			
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			try {
+				@SuppressWarnings("unused")
+				Process client =Runtime.getRuntime().exec("taskkill /f /t /im client.exe");
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
 			getkey.setVisible(true);
 			start.setVisible(true);
 			id.setVisible(true);
@@ -192,12 +260,16 @@ public class Control {
 			idtext.setVisible(true);
 			passwordtext.setVisible(true);
 			keytext.setVisible(true);
+			ten.setVisible(true);
+			five.setVisible(true);
 			
 			text.setVisible(false);
 			myreturn.setVisible(false);
 			//exit.setVisible(false);
 			
 			flagwait=1;
+			
+			data.setflag("null");
 		});
 		
 		
