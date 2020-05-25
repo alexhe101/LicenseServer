@@ -6,9 +6,9 @@ import schedule
 from util import gen_id, read_json, read_text, write_text
 
 config_path = 'config.json'
-key_path = 'key'
-uid_path = 'uid'
-status_path = "status.txt"
+key_path = os.path.join(os.path.dirname(__file__),'key')
+uid_path = os.path.join(os.path.dirname(__file__),'uid')
+status_path = os.path.join(os.path.dirname(__file__),"status.txt")
 
 sock = None
 ip = ''
@@ -24,7 +24,7 @@ activated = False
 def main():
     try:
         global conf, uid, key, ip, port, sock,status_file
-        conf = read_json(os.path.join(os.getcwd(),config_path))
+        conf = read_json(os.path.join(os.path.dirname(__file__),config_path))
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         socket.setdefaulttimeout(3)
         sock.settimeout(3)
@@ -91,7 +91,8 @@ def prompt_for_key():
     res = 'NKEY'
     while res == 'NKEY':
         #while len(key) != 32:
-        status_file.write('Please enter valid license key: ')
+        with open(status_path,"w") as status_file:
+            status_file.write('Please enter valid license key: ')
         key = input('Please enter valid license key: ')
         res = post_request('HELO')
     write_text(key_path, key)
