@@ -89,10 +89,10 @@ def post_request(req):
 def prompt_for_key():
     global key
     res = 'NKEY'
-    status_file = open(status_path, "w")
     while res == 'NKEY':
         #while len(key) != 32:
-        status_file.write('Please enter valid license key: ')
+        with open(status_path,"w") as status_file:
+            status_file.write('Please enter valid license key: ')
         key = input('Please enter valid license key: ')
         res = post_request('HELO')
     write_text(key_path, key)
